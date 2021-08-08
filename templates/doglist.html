@@ -1,0 +1,41 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Doggos!{% endblock %}
+
+{% block head %}
+<style>
+  .dog-photo {
+    width: 200px;
+  }
+</style>
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class='container'>
+<div class='row'>
+  <div class='col-sm-12'>
+    <table class='table table-bordered table-condensed'>
+      <thead>
+        <th>Name</th>
+        <th>Photo</th>
+        <th>Breed</th>
+        <th>First Seen</th>
+        <th>Sex</th>
+        <th>Organization</th>
+      </thead>
+      
+      {% for row in rows %}
+        <tr>
+            <td><a href={{row["link"]}} target="_blank">{{row["name"]}}</a></td>
+            <td><img class='dog-photo' src={{row['photoLink']}}/></td>
+            <td>{{row["Breed"]}}</td>
+            <td style="white-space: pre-wrap;">{{row['firstSeen']|strftime}}</td>
+            <td>{{row['sex']}}</td>
+            <td><a href="{{row['org_link']}}" target="_blank">{{row['org_name']}}</a></td>
+        </tr>
+      {% endfor %}
+    </table> 
+    </div>
+</div>
+</div>
+{% endblock %}
