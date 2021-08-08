@@ -8,6 +8,8 @@ from requests.api import request
 
 load_dotenv()
 
+placeholder_im = 'https://graphicriver.img.customer.envatousercontent.com/files/270440720/CartoonDogPointer%20p.jpg?auto=compress%2Cformat&q=80&fit=crop&crop=top&max-h=8000&max-w=590&s=d7ccf47eef9f9a8f679c134cc70bffa5'
+
 def get_dogs(token):
     url = 'https://api.petfinder.com/v2/animals/' + \
           '?type=Dog&location=80305&age=baby&size=medium&sort=recent'
@@ -62,7 +64,7 @@ def make_html(dogs_list):
                       style="max-height:300px;"></td>
                     """
         else:
-            row += f"""<td><img src={'https://graphicriver.img.customer.envatousercontent.com/files/270440720/CartoonDogPointer%20p.jpg?auto=compress%2Cformat&q=80&fit=crop&crop=top&max-h=8000&max-w=590&s=d7ccf47eef9f9a8f679c134cc70bffa5'} class="img-fluid img-thumbnail" 
+            row += f"""<td><img src={placeholder_im} class="img-fluid img-thumbnail" 
                       style="max-height:300px;"></td>
                     """
         row +=  f"""
@@ -175,7 +177,7 @@ def process_results(data, con, token):
         if d['primary_photo_cropped'] is not None:
             photoLink = d['primary_photo_cropped']['full']
         else:
-            photoLink = None
+            photoLink = placeholder_im
         breed = d['breeds']['primary']
         if d['breeds']['secondary'] is not None:
             breed = breed + ' / ' + d['breeds']['secondary']

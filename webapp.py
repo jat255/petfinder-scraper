@@ -14,7 +14,8 @@ def list():
    cur = con.cursor()
    cur.execute("SELECT d.name, d.link, d.photoLink, d.breed, d.firstSeen, d.sex, "
                "       o.name AS org_name, o.url AS org_link FROM dogs d "
-               "INNER JOIN orgs o ON d.org = o.id")
+               "INNER JOIN orgs o ON d.org = o.id "
+               "ORDER BY firstSeen DESC")
    
    rows = cur.fetchall(); 
 
