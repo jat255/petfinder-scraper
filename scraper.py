@@ -2,13 +2,22 @@ import sqlite3
 import os
 import requests
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from requests.api import request
 
 load_dotenv()
 
 placeholder_im = 'https://graphicriver.img.customer.envatousercontent.com/files/270440720/CartoonDogPointer%20p.jpg?auto=compress%2Cformat&q=80&fit=crop&crop=top&max-h=8000&max-w=590&s=d7ccf47eef9f9a8f679c134cc70bffa5'
+
+def dict_factory(cursor, row):
+    """
+    Helper to get sqlite response as dict instead of tuple
+    """
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
 def get_dogs(token):
     url = 'https://api.petfinder.com/v2/animals/' + \
@@ -48,7 +57,7 @@ def make_html(dogs_list):
                         <th>Picture</th>
                         <th>Breed</th>
                         <th>Sex</th>
-                        <th>Link</th>
+                        <th>Organization</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -57,7 +66,7 @@ def make_html(dogs_list):
     def _make_row(dog_dict):
         row = f"""
                <tr>
-                <td>{dog_dict['name']}</td>
+                <td><a href="{dog_dict['link']}">{dog_dict['name']}</a></td>
                """
         if dog_dict['photoLink']:
             row += f"""<td><img src={dog_dict['photoLink']} class="img-fluid img-thumbnail" 
@@ -70,7 +79,11 @@ def make_html(dogs_list):
         row +=  f"""
                     <td>{dog_dict['breed']}</td>
                     <td>{dog_dict['sex']}</td>
-                    <td><a href={dog_dict['link']} target='_blank'>Link</a></td>
+                    <td>
+                        <a href={dog_dict['org_link']} target='_blank'>
+                            {dog_dict['org_name']}
+                        </a>
+                    </td>
                     </tr>
                 """
 
@@ -101,6 +114,10 @@ def send_email(html, num_dogs):
     you2 = os.environ['SEND_TO_2']
     
     for you in [you1, you2]:
+        # skip sending if the "to" email isn't defined 
+        if you == "":
+            continue
+
         # Create message container - the
         # correct MIME type is multipart/alternative.
         msg = MIMEMultipart('alternative')
@@ -118,6 +135,7 @@ def send_email(html, num_dogs):
         server.login(me, os.environ['GMAIL_PASS'])
         server.sendmail(me, you,
                         msg.as_string())
+        print(f"Sending email notification to {you} from {me}")
         server.quit()
 
 def get_token():
@@ -169,7 +187,6 @@ def process_results(data, con, token):
         The connection object to the DB
     """
     now = datetime.now()
-    new_dogs = []
     for d in data:
         dog_id = d['id']
         org_id = d['organization_id']
@@ -206,16 +223,17 @@ def process_results(data, con, token):
         with con:
             print(f"Adding dog with name {name} and id {dog_id}")
             con.execute(insert_q, insert_vals)
-            new_dogs.append({
-                'id': dog_id,
-                'name': name,
-                'age': age,
-                'sex': sex,
-                'breed': breed,
-                'photoLink': photoLink,
-                'link': link,
-                'org': org_id
-            })
+
+    con.row_factory = dict_factory
+    with con:
+        # get all dogs added in last 10 minutes
+        new_dogs = con.execute(
+            "SELECT d.name, d.link, d.photoLink, d.breed, d.firstSeen, "
+                   "d.sex, o.name AS org_name, o.url AS org_link "
+            "FROM dogs d INNER JOIN orgs o ON d.org = o.id "
+            "WHERE d.firstSeen > ? "
+            "ORDER BY firstSeen DESC", 
+            (now - timedelta(minutes=10), )).fetchall()
 
     return new_dogs
 
