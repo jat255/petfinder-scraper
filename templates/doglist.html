@@ -12,8 +12,17 @@
 
 {% block content %}
 <div class='container'>
+  <div class='row'>
+    <div class='col-sm-12'>
+      <h3>Log file:</h3>
+      <pre style='max-height: 10em;'>
+        {{log}}
+      </pre>
+    </div>
+  </div>
 <div class='row'>
   <div class='col-sm-12'>
+    <h3>Dogs in database:</h3>
     <table class='table table-bordered table-condensed'>
       <thead>
         <th>Name</th>
