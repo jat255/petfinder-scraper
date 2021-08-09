@@ -15,7 +15,7 @@
   <div class='row'>
     <div class='col-sm-12'>
       <h3>Log file:</h3>
-      <pre style='max-height: 10em;'>
+      <pre id='logArea' style='max-height: 38em;'>
         {{log}}
       </pre>
     </div>
@@ -47,4 +47,13 @@
     </div>
 </div>
 </div>
+
+<script>
+  // self executing function here
+  (function() {
+     // scroll to the bottom of the text area after the page is loaded
+      logTa = document.getElementById("logArea")
+      logTa.scrollTop = logTa.scrollHeight;
+  })();
+</script>
 {% endblock %}
