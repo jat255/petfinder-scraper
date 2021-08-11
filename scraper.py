@@ -21,7 +21,7 @@ def dict_factory(cursor, row):
 
 def get_dogs(token):
     url = 'https://api.petfinder.com/v2/animals/' + \
-          '?type=Dog&location=80305&age=baby&size=medium&sort=recent'
+          '?type=Dog&location=80305&age=baby&size=medium&sort=recent&limit=100'
 
     r = requests.get(url, headers={"Authorization": token})
     if r.status_code != 200:
